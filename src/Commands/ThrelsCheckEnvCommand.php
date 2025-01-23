@@ -4,7 +4,6 @@ namespace Threls\ThrelsCheckEnv\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
 
 class ThrelsCheckEnvCommand extends Command
 {
@@ -72,6 +71,7 @@ class ThrelsCheckEnvCommand extends Command
 
         if (! File::exists($envFile) || ! File::exists($testEnvFile)) {
             $this->error("One or both files are missing: $envFile, $testEnvFile");
+
             return self::FAILURE;
         }
 
@@ -82,7 +82,7 @@ class ThrelsCheckEnvCommand extends Command
         File::delete($testEncryptedFile);
 
         if ($envContent !== $decryptedContent) {
-           $this->error("The .env.$env and decrypted .env.$env.encrypted do not match.");
+            $this->error("The .env.$env and decrypted .env.$env.encrypted do not match.");
 
             return self::FAILURE;
         }
