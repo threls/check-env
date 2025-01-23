@@ -38,9 +38,9 @@ class ThrelsCheckEnvCommand extends Command
         $testEncryptedFile = base_path(".env.$env.$suffix.encrypted");
 
         if (! File::exists($encryptedFile)) {
-            Log::error("Encrypted file not found: $encryptedFile");
+            $this->error("Encrypted file not found: $encryptedFile");
 
-            return;
+            return self::FAILURE;
         }
 
         File::copy($encryptedFile, $testEncryptedFile);
@@ -56,9 +56,9 @@ class ThrelsCheckEnvCommand extends Command
         exec($decryptCommand, $output, $resultCode);
 
         if ($resultCode !== 0) {
-            Log::error("Failed to decrypt the .env.$env.$suffix.encrypted file.");
+            $this->error("Failed to decrypt the .env.$env.$suffix.encrypted file.");
 
-            return;
+            return self::FAILURE;
         }
 
         $this->info("Decrypted .env.$env.$suffix.encrypted successfully.");
@@ -71,9 +71,8 @@ class ThrelsCheckEnvCommand extends Command
         $testEncryptedFile = base_path(".env.$env.$suffix.encrypted");
 
         if (! File::exists($envFile) || ! File::exists($testEnvFile)) {
-            Log::error("One or both files are missing: $envFile, $testEnvFile");
-
-            return;
+            $this->error("One or both files are missing: $envFile, $testEnvFile");
+            return self::FAILURE;
         }
 
         $envContent = collect(File::lines($envFile))->sort()->implode("\n");
@@ -83,9 +82,9 @@ class ThrelsCheckEnvCommand extends Command
         File::delete($testEncryptedFile);
 
         if ($envContent !== $decryptedContent) {
-            Log::error("The .env.$env and decrypted .env.$env.encrypted do not match.");
+           $this->error("The .env.$env and decrypted .env.$env.encrypted do not match.");
 
-            return;
+            return self::FAILURE;
         }
 
         $this->info("Success: .env.$env and the decrypted .env.$env.encrypted match.");
