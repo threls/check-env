@@ -18,14 +18,12 @@ class CheckEnvDiffService
 
     public array $diff = [];
 
-
     public function __construct()
     {
         $this->config = config('check-env');
         $this->output = new BufferedOutput;
         $this->table = new Table($this->output);
     }
-
 
     public function add($file): void
     {
@@ -36,10 +34,9 @@ class CheckEnvDiffService
         }
     }
 
-
-    public function getData(string $file = null): array
+    public function getData(?string $file = null): array
     {
-        if (null === $file) {
+        if ($file === null) {
             return $this->data;
         }
 
@@ -48,39 +45,37 @@ class CheckEnvDiffService
 
     public function diff(): array
     {
-//        $variables = [];
-//
-//        foreach ($this->data as $file => $vars) {
-//            foreach ($vars as $key => $value) {
-//                if (in_array($key, $variables, false)) {
-//                    continue;
-//                }
-//
-//                $variables[] = $key;
-//            }
-//        }
+        //        $variables = [];
+        //
+        //        foreach ($this->data as $file => $vars) {
+        //            foreach ($vars as $key => $value) {
+        //                if (in_array($key, $variables, false)) {
+        //                    continue;
+        //                }
+        //
+        //                $variables[] = $key;
+        //            }
+        //        }
 
         $variables = array_unique(array_merge(...array_map('array_keys', $this->data)));
 
-
         foreach ($variables as $variable) {
-//            $containing = [];
-//
-//            foreach ($this->data as $file => $vars) {
-//                $containing[$file] = array_key_exists($variable, $vars);
-//            }
-//
-//            $unique = array_unique(array_values($containing));
-//
-//            if (1 === count($unique) && true === $unique[0]) {
-//                continue;
-//            }
-//
-//            $this->diff[$variable] = $containing;
-
+            //            $containing = [];
+            //
+            //            foreach ($this->data as $file => $vars) {
+            //                $containing[$file] = array_key_exists($variable, $vars);
+            //            }
+            //
+            //            $unique = array_unique(array_values($containing));
+            //
+            //            if (1 === count($unique) && true === $unique[0]) {
+            //                continue;
+            //            }
+            //
+            //            $this->diff[$variable] = $containing;
 
             $containing = array_map(
-                fn($vars) => array_key_exists($variable, $vars),
+                fn ($vars) => array_key_exists($variable, $vars),
                 $this->data
             );
 
@@ -96,7 +91,6 @@ class CheckEnvDiffService
 
         return $this->diff;
     }
-
 
     public function buildTable(): void
     {
@@ -118,10 +112,10 @@ class CheckEnvDiffService
             foreach ($files as $file) {
                 $value = null;
 
-                if ( ! $showValues) {
+                if (! $showValues) {
                     $value = $this->valueNotFound();
 
-                    if (true === $containing[$file]) {
+                    if ($containing[$file] === true) {
                         $value = $this->valueOkay();
                     }
                 } else {
@@ -129,7 +123,7 @@ class CheckEnvDiffService
 
                     $existing = $this->getData($file)[$variable] ?? null;
 
-                    if (null !== $existing) {
+                    if ($existing !== null) {
                         $value = $existing;
                     }
                 }
@@ -159,6 +153,4 @@ class CheckEnvDiffService
     {
         return '<fg=red> N </>';
     }
-
 }
-
