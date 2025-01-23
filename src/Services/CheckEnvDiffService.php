@@ -9,15 +9,19 @@ use Symfony\Component\Console\Output\BufferedOutput;
 class CheckEnvDiffService
 {
     private array $data = [];
+
     private Table $table;
+
     private BufferedOutput $output;
+
     private array $config;
+
     public array $diff = [];
 
     public function __construct()
     {
         $this->config = config('check-env');
-        $this->output = new BufferedOutput();
+        $this->output = new BufferedOutput;
         $this->table = new Table($this->output);
     }
 
@@ -30,8 +34,7 @@ class CheckEnvDiffService
         }
     }
 
-
-    public function getData(string $file = null): array
+    public function getData(?string $file = null): array
     {
         return $file === null ? $this->data : ($this->data[$file] ?? []);
     }
