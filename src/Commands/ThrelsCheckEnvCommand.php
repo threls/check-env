@@ -92,7 +92,7 @@ class ThrelsCheckEnvCommand extends Command
         File::delete($testEncryptedFile);
 
         if ($envContent !== $decryptedContent) {
-           $this->error("The .env.$env and decrypted .env.$env.encrypted do not match.");
+            $this->error("The .env.$env and decrypted .env.$env.encrypted do not match.");
 
             $this->failure = true;
             return;
