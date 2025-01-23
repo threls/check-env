@@ -8,21 +8,21 @@ use Symfony\Component\Console\Output\BufferedOutput;
 
 class CheckEnvDiffService
 {
-    private array $data = [];
+    private $data;
 
-    private Table $table;
+    private $table;
 
-    private BufferedOutput $output;
+    private $output;
 
-    private array $config;
-
-    public array $diff = [];
+    public $config;
 
     public function __construct()
     {
         $this->config = config('check-env');
-        $this->output = new BufferedOutput;
-        $this->table = new Table($this->output);
+
+        $this->table = new Table(
+            $this->output = new BufferedOutput()
+        );
     }
 
     public function add($file): void
@@ -30,84 +30,128 @@ class CheckEnvDiffService
         $files = is_array($file) ? $file : [$file];
 
         foreach ($files as $envFile) {
-            $this->data[$envFile] = Dotenv::createMutable(base_path(), $envFile)->load();
+            $this->setData(
+                $envFile,
+                Dotenv::createMutable($this->getPath(), $envFile)->load()
+            );
         }
     }
 
-    public function getData(?string $file = null): array
+    private function getPath(): string
     {
-        return $file === null ? $this->data : ($this->data[$file] ?? []);
+        return $this->config['path'] ?? base_path();
+    }
+
+    public function setData(string $file, array $data): void
+    {
+        $this->data[$file] = $data;
+    }
+
+    public function getData(string $file = null): array
+    {
+        if (null === $file) {
+            return $this->data;
+        }
+
+        return $this->data[$file] ?? [];
     }
 
     public function diff(): array
     {
-        $allVariables = $this->getAllVariables();
+        $variables = [];
 
-        foreach ($allVariables as $variable) {
-            $filePresence = $this->getVariablePresenceAcrossFiles($variable);
+        foreach ($this->data as $file => $vars) {
+            foreach ($vars as $key => $value) {
+                if (in_array($key, $variables, false)) {
+                    continue;
+                }
 
-            if (count(array_unique($filePresence)) > 1) {
-                $this->diff[$variable] = $filePresence;
+                $variables[] = $key;
             }
         }
 
-        return $this->diff;
-    }
+        $diff = [];
 
-    private function getAllVariables(): array
-    {
-        return array_unique(array_merge(...array_map('array_keys', $this->data)));
-    }
+        foreach ($variables as $variable) {
+            $containing = [];
 
-    private function getVariablePresenceAcrossFiles(string $variable): array
-    {
-        $presence = [];
+            foreach ($this->data as $file => $vars) {
+                $containing[$file] = array_key_exists($variable, $vars);
+            }
 
-        foreach ($this->data as $file => $vars) {
-            $presence[$file] = array_key_exists($variable, $vars);
+            $unique = array_unique(array_values($containing));
+
+            if (1 === count($unique) && true === $unique[0]) {
+                continue;
+            }
+
+            $diff[$variable] = $containing;
         }
 
-        return $presence;
+        return $diff;
+    }
+
+
+    public function buildTable(): void
+    {
+        $files = array_keys($this->data);
+
+        $headers = ['Variable'];
+
+        foreach ($files as $file) {
+            $headers[] = $file;
+        }
+
+        $this->table->setHeaders($headers);
+
+        $showValues = $this->config['show_values'] ?? false;
+
+        foreach ($this->diff() as $variable => $containing) {
+            $row = [$variable];
+
+            foreach ($files as $file) {
+                $value = null;
+
+                if ( ! $showValues) {
+                    $value = $this->valueNotFound();
+
+                    if (true === $containing[$file]) {
+                        $value = $this->valueOkay();
+                    }
+                } else {
+                    $value = '<fg=red> MISSING </>';
+
+                    $existing = $this->getData($file)[$variable] ?? null;
+
+                    if (null !== $existing) {
+                        $value = $existing;
+                    }
+                }
+
+                $row[] = $value;
+            }
+
+            $this->table->addRow($row);
+        }
     }
 
     public function displayTable(): void
     {
         $this->buildTable();
+
         $this->table->render();
+
         echo $this->output->fetch();
-    }
-
-    private function buildTable(): void
-    {
-        $headers = ['Variable', ...array_keys($this->data)];
-        $this->table->setHeaders($headers);
-
-        foreach ($this->diff() as $variable => $filePresence) {
-            $this->table->addRow($this->buildRow($variable, $filePresence));
-        }
-    }
-
-    private function buildRow(string $variable, array $filePresence): array
-    {
-        $showValues = $this->config['show_values'] ?? false;
-        $row = [$variable];
-
-        foreach ($filePresence as $file => $exists) {
-            $row[] = $showValues
-                ? ($this->getData($file)[$variable] ?? '<fg=red> MISSING </>')
-                : ($exists ? $this->valueOkay() : $this->valueNotFound());
-        }
-
-        return $row;
     }
 
     private function valueOkay(): string
     {
-        return '<fg=green>Y</>';
+        return '<fg=green> Y </>';
     }
 
     private function valueNotFound(): string
     {
-        return '<fg=red>N</>';
+        return '<fg=red> N </>';
     }
+
 }
