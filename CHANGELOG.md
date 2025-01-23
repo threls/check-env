@@ -2,6 +2,10 @@
 
 All notable changes to `check-env` will be documented in this file.
 
+## 1.0.7 - 2025-01-23
+
+Fixes
+
 ## 1.0.6 - 2025-01-23
 
 Bug fixes

@@ -18,14 +18,12 @@ class CheckEnvDiffService
 
     public array $diff = [];
 
-
     public function __construct()
     {
         $this->config = config('check-env');
         $this->output = new BufferedOutput;
         $this->table = new Table($this->output);
     }
-
 
     public function add($file): void
     {
@@ -36,10 +34,9 @@ class CheckEnvDiffService
         }
     }
 
-
-    public function getData(string $file = null): array
+    public function getData(?string $file = null): array
     {
-        if (null === $file) {
+        if ($file === null) {
             return $this->data;
         }
 
@@ -60,7 +57,6 @@ class CheckEnvDiffService
             }
         }
 
-
         foreach ($variables as $variable) {
             $containing = [];
 
@@ -80,7 +76,6 @@ class CheckEnvDiffService
 
         return $this->diff;
     }
-
 
     public function buildTable(): void
     {
@@ -105,7 +100,7 @@ class CheckEnvDiffService
                 if (!$showValues) {
                     $value = $this->valueNotFound();
 
-                    if (true === $containing[$file]) {
+                    if ($containing[$file] === true) {
                         $value = $this->valueOkay();
                     }
                 } else {
@@ -113,7 +108,7 @@ class CheckEnvDiffService
 
                     $existing = $this->getData($file)[$variable] ?? null;
 
-                    if (null !== $existing) {
+                    if ($existing !== null) {
                         $value = $existing;
                     }
                 }
@@ -143,6 +138,4 @@ class CheckEnvDiffService
     {
         return '<fg=red> N </>';
     }
-
 }
-
