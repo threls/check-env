@@ -15,14 +15,6 @@ class ThrelsCheckEnvCommand extends Command
 
     public bool $failure = false;
 
-    public Repository $config;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->config = config('check-env');
-    }
-
     public function handle()
     {
         $this->info('Starting environment file validation...');
@@ -30,9 +22,9 @@ class ThrelsCheckEnvCommand extends Command
 
         $this->checkDiffBetweenEnvs();
 
-        $suffix = $this->config->get('check-env.temp-env-suffix');
+        $suffix = config('check-env.temp-env-suffix');
 
-        $environments = $this->config->get('check-env.environments');
+        $environments = config('check-env.environments');
 
         foreach ($environments as $env => $key) {
             $this->info("Checking environment: $env");
@@ -112,10 +104,6 @@ class ThrelsCheckEnvCommand extends Command
     protected function checkDiffBetweenEnvs(): void
     {
         $files = config('check-env.files') ?: ['.env'];
-
-        if ($overrideFiles = $this->argument('files')) {
-            $files = explode(',', $overrideFiles);
-        }
 
         $service = new CheckEnvDiffService();
 
