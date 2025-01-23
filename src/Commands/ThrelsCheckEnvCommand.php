@@ -2,7 +2,6 @@
 
 namespace Threls\ThrelsCheckEnv\Commands;
 
-use Illuminate\Config\Repository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Threls\ThrelsCheckEnv\Services\CheckEnvDiffService;
@@ -42,10 +41,11 @@ class ThrelsCheckEnvCommand extends Command
         $encryptedFile = base_path(".env.$env.encrypted");
         $testEncryptedFile = base_path(".env.$env.$suffix.encrypted");
 
-        if (!File::exists($encryptedFile)) {
+        if (! File::exists($encryptedFile)) {
             $this->error("Encrypted file not found: $encryptedFile");
 
             $this->failure = true;
+
             return;
         }
 
@@ -65,6 +65,7 @@ class ThrelsCheckEnvCommand extends Command
             $this->error("Failed to decrypt the .env.$env.$suffix.encrypted file.");
 
             $this->failure = true;
+
             return;
         }
 
@@ -77,9 +78,10 @@ class ThrelsCheckEnvCommand extends Command
         $testEnvFile = base_path(".env.$env.$suffix");
         $testEncryptedFile = base_path(".env.$env.$suffix.encrypted");
 
-        if (!File::exists($envFile) || !File::exists($testEnvFile)) {
+        if (! File::exists($envFile) || ! File::exists($testEnvFile)) {
             $this->error("One or both files are missing: $envFile, $testEnvFile");
             $this->failure = true;
+
             return;
         }
 
@@ -93,6 +95,7 @@ class ThrelsCheckEnvCommand extends Command
             $this->error("The .env.$env and decrypted .env.$env.encrypted do not match.");
 
             $this->failure = true;
+
             return;
         }
 
@@ -100,22 +103,21 @@ class ThrelsCheckEnvCommand extends Command
 
     }
 
-
     protected function checkDiffBetweenEnvs(): void
     {
         $files = config('check-env.files') ?: ['.env'];
 
-        $service = new CheckEnvDiffService();
+        $service = new CheckEnvDiffService;
 
         $service->add($files);
 
         $service->displayTable();
 
-        if (!empty($service->diff)) {
-            $this->error("You have missing variables between your env files.");
+        if (! empty($service->diff)) {
+            $this->error('You have missing variables between your env files.');
             $this->failure = true;
         } else {
-            $this->info("No differences between your env files.");
+            $this->info('No differences between your env files.');
         }
     }
 
@@ -125,9 +127,9 @@ class ThrelsCheckEnvCommand extends Command
             return self::FAILURE;
         } else {
             $this->info("\nEnvironment file validation completed successfully for all environments.");
+
             return self::SUCCESS;
         }
 
     }
-
 }
