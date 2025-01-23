@@ -2,25 +2,37 @@
 
 namespace Threls\ThrelsCheckEnv\Commands;
 
+use Illuminate\Config\Repository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
+use Threls\ThrelsCheckEnv\Services\CheckEnvDiffService;
 
 class ThrelsCheckEnvCommand extends Command
 {
     public $signature = 'check-env';
 
-    public $description = 'My command';
+    public $description = 'Check encrypted environments if they are the same as decrypted environment. ';
 
     public bool $failure = false;
+
+    public Repository $config;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->config = config('check-env');
+    }
 
     public function handle()
     {
         $this->info('Starting environment file validation...');
+        $this->info('Step 1: Check differences between decrypted environments...');
 
-        $suffix = config('check-env.temp-env-suffix');
+        $this->checkDiffBetweenEnvs();
 
-        $environments = config('check-env.environments');
+        $suffix = $this->config->get('check-env.temp-env-suffix');
+
+        $environments = $this->config->get('check-env.environments');
 
         foreach ($environments as $env => $key) {
             $this->info("Checking environment: $env");
@@ -29,13 +41,7 @@ class ThrelsCheckEnvCommand extends Command
             $this->compareEnvFiles($env, $suffix);
         }
 
-        if ($this->failure) {
-            return self::FAILURE;
-        }
-        else{
-            $this->info("\nEnvironment file validation completed successfully for all environments.");
-            return self::SUCCESS;
-        }
+        return $this->checkFailure();
 
     }
 
@@ -44,7 +50,7 @@ class ThrelsCheckEnvCommand extends Command
         $encryptedFile = base_path(".env.$env.encrypted");
         $testEncryptedFile = base_path(".env.$env.$suffix.encrypted");
 
-        if (! File::exists($encryptedFile)) {
+        if (!File::exists($encryptedFile)) {
             $this->error("Encrypted file not found: $encryptedFile");
 
             $this->failure = true;
@@ -79,7 +85,7 @@ class ThrelsCheckEnvCommand extends Command
         $testEnvFile = base_path(".env.$env.$suffix");
         $testEncryptedFile = base_path(".env.$env.$suffix.encrypted");
 
-        if (! File::exists($envFile) || ! File::exists($testEnvFile)) {
+        if (!File::exists($envFile) || !File::exists($testEnvFile)) {
             $this->error("One or both files are missing: $envFile, $testEnvFile");
             $this->failure = true;
             return;
@@ -101,4 +107,39 @@ class ThrelsCheckEnvCommand extends Command
         $this->info("Success: .env.$env and the decrypted .env.$env.encrypted match.");
 
     }
+
+
+    protected function checkDiffBetweenEnvs(): void
+    {
+        $files = config('check-env.files') ?: ['.env'];
+
+        if ($overrideFiles = $this->argument('files')) {
+            $files = explode(',', $overrideFiles);
+        }
+
+        $service = new CheckEnvDiffService();
+
+        $service->add($files);
+
+        $service->displayTable();
+
+        if (!empty($service->diff)) {
+            $this->error("You have missing variables between your env files.");
+            $this->failure = true;
+        } else {
+            $this->info("No differences between your env files.");
+        }
+    }
+
+    protected function checkFailure()
+    {
+        if ($this->failure) {
+            return self::FAILURE;
+        } else {
+            $this->info("\nEnvironment file validation completed successfully for all environments.");
+            return self::SUCCESS;
+        }
+
+    }
+
 }
