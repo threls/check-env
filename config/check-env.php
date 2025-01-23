@@ -28,12 +28,11 @@ return [
             'encryption-key' => '',
         ],
 
-     // Users can add as many environments as they want:
-     // 'production' => [
-     //     'encryption-key' => '',
-     // ],
+        // Users can add as many environments as they want:
+        // 'production' => [
+        //     'encryption-key' => '',
+        // ],
     ],
-
 
     'files' => [
         '.env',
@@ -42,5 +41,5 @@ return [
     ],
 
     /* Show values on env diff table */
-    'show_values' => false
+    'show_values' => false,
 ];
