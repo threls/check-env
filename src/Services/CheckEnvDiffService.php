@@ -8,48 +8,38 @@ use Symfony\Component\Console\Output\BufferedOutput;
 
 class CheckEnvDiffService
 {
-    private $data;
+    private array $data = [];
 
-    private $table;
+    private Table $table;
 
-    private $output;
+    private BufferedOutput $output;
 
-    public $config;
+    private array $config;
+
+    public array $diff = [];
+
 
     public function __construct()
     {
         $this->config = config('check-env');
-
-        $this->table = new Table(
-            $this->output = new BufferedOutput
-        );
+        $this->output = new BufferedOutput;
+        $this->table = new Table($this->output);
     }
+
 
     public function add($file): void
     {
         $files = is_array($file) ? $file : [$file];
 
         foreach ($files as $envFile) {
-            $this->setData(
-                $envFile,
-                Dotenv::createMutable($this->getPath(), $envFile)->load()
-            );
+            $this->data[$envFile] = Dotenv::createMutable(base_path(), $envFile)->load();
         }
     }
 
-    private function getPath(): string
-    {
-        return $this->config['path'] ?? base_path();
-    }
 
-    public function setData(string $file, array $data): void
+    public function getData(string $file = null): array
     {
-        $this->data[$file] = $data;
-    }
-
-    public function getData(?string $file = null): array
-    {
-        if ($file === null) {
+        if (null === $file) {
             return $this->data;
         }
 
@@ -58,38 +48,55 @@ class CheckEnvDiffService
 
     public function diff(): array
     {
-        $variables = [];
+//        $variables = [];
+//
+//        foreach ($this->data as $file => $vars) {
+//            foreach ($vars as $key => $value) {
+//                if (in_array($key, $variables, false)) {
+//                    continue;
+//                }
+//
+//                $variables[] = $key;
+//            }
+//        }
 
-        foreach ($this->data as $file => $vars) {
-            foreach ($vars as $key => $value) {
-                if (in_array($key, $variables, false)) {
-                    continue;
-                }
+        $variables = array_unique(array_merge(...array_map('array_keys', $this->data)));
 
-                $variables[] = $key;
-            }
-        }
-
-        $diff = [];
 
         foreach ($variables as $variable) {
-            $containing = [];
+//            $containing = [];
+//
+//            foreach ($this->data as $file => $vars) {
+//                $containing[$file] = array_key_exists($variable, $vars);
+//            }
+//
+//            $unique = array_unique(array_values($containing));
+//
+//            if (1 === count($unique) && true === $unique[0]) {
+//                continue;
+//            }
+//
+//            $this->diff[$variable] = $containing;
 
-            foreach ($this->data as $file => $vars) {
-                $containing[$file] = array_key_exists($variable, $vars);
-            }
 
-            $unique = array_unique(array_values($containing));
+            $containing = array_map(
+                fn($vars) => array_key_exists($variable, $vars),
+                $this->data
+            );
 
-            if (count($unique) === 1 && $unique[0] === true) {
+            $unique = array_unique($containing);
+
+            if (count($unique) === 1 && reset($unique) === true) {
                 continue;
             }
 
-            $diff[$variable] = $containing;
+            $this->diff[$variable] = array_combine(array_keys($this->data), $containing);
+
         }
 
-        return $diff;
+        return $this->diff;
     }
+
 
     public function buildTable(): void
     {
@@ -111,10 +118,10 @@ class CheckEnvDiffService
             foreach ($files as $file) {
                 $value = null;
 
-                if (! $showValues) {
+                if ( ! $showValues) {
                     $value = $this->valueNotFound();
 
-                    if ($containing[$file] === true) {
+                    if (true === $containing[$file]) {
                         $value = $this->valueOkay();
                     }
                 } else {
@@ -122,7 +129,7 @@ class CheckEnvDiffService
 
                     $existing = $this->getData($file)[$variable] ?? null;
 
-                    if ($existing !== null) {
+                    if (null !== $existing) {
                         $value = $existing;
                     }
                 }
@@ -152,4 +159,6 @@ class CheckEnvDiffService
     {
         return '<fg=red> N </>';
     }
+
 }
+
