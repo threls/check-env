@@ -48,49 +48,33 @@ class CheckEnvDiffService
 
     public function diff(): array
     {
-//        $variables = [];
-//
-//        foreach ($this->data as $file => $vars) {
-//            foreach ($vars as $key => $value) {
-//                if (in_array($key, $variables, false)) {
-//                    continue;
-//                }
-//
-//                $variables[] = $key;
-//            }
-//        }
+        $variables = [];
 
-        $variables = array_unique(array_merge(...array_map('array_keys', $this->data)));
+        foreach ($this->data as $file => $vars) {
+            foreach ($vars as $key => $value) {
+                if (in_array($key, $variables, false)) {
+                    continue;
+                }
+
+                $variables[] = $key;
+            }
+        }
 
 
         foreach ($variables as $variable) {
-//            $containing = [];
-//
-//            foreach ($this->data as $file => $vars) {
-//                $containing[$file] = array_key_exists($variable, $vars);
-//            }
-//
-//            $unique = array_unique(array_values($containing));
-//
-//            if (1 === count($unique) && true === $unique[0]) {
-//                continue;
-//            }
-//
-//            $this->diff[$variable] = $containing;
+            $containing = [];
 
+            foreach ($this->data as $file => $vars) {
+                $containing[$file] = array_key_exists($variable, $vars);
+            }
 
-            $containing = array_map(
-                fn($vars) => array_key_exists($variable, $vars),
-                $this->data
-            );
+            $unique = array_unique(array_values($containing));
 
-            $unique = array_unique($containing);
-
-            if (count($unique) === 1 && reset($unique) === true) {
+            if (1 === count($unique) && true === $unique[0]) {
                 continue;
             }
 
-            $this->diff[$variable] = array_combine(array_keys($this->data), $containing);
+            $this->diff[$variable] = $containing;
 
         }
 
@@ -118,7 +102,7 @@ class CheckEnvDiffService
             foreach ($files as $file) {
                 $value = null;
 
-                if ( ! $showValues) {
+                if (!$showValues) {
                     $value = $this->valueNotFound();
 
                     if (true === $containing[$file]) {
