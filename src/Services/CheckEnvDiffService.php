@@ -66,7 +66,7 @@ class CheckEnvDiffService
 
             $unique = array_unique(array_values($containing));
 
-            if (1 === count($unique) && true === $unique[0]) {
+            if (count($unique) === 1 && $unique[0] === true) {
                 continue;
             }
 
@@ -97,7 +97,7 @@ class CheckEnvDiffService
             foreach ($files as $file) {
                 $value = null;
 
-                if (!$showValues) {
+                if (! $showValues) {
                     $value = $this->valueNotFound();
 
                     if ($containing[$file] === true) {
