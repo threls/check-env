@@ -12,6 +12,8 @@ class ThrelsCheckEnvCommand extends Command
 
     public $description = 'My command';
 
+    public bool $failure = false;
+
     public function handle()
     {
         $this->info('Starting environment file validation...');
@@ -27,9 +29,14 @@ class ThrelsCheckEnvCommand extends Command
             $this->compareEnvFiles($env, $suffix);
         }
 
-        $this->info("\nEnvironment file validation completed successfully for all environments.");
+        if ($this->failure) {
+            return self::FAILURE;
+        }
+        else{
+            $this->info("\nEnvironment file validation completed successfully for all environments.");
+            return self::SUCCESS;
+        }
 
-        return self::SUCCESS;
     }
 
     protected function copyEncryptedFile(string $env, string $suffix)
@@ -40,7 +47,8 @@ class ThrelsCheckEnvCommand extends Command
         if (! File::exists($encryptedFile)) {
             $this->error("Encrypted file not found: $encryptedFile");
 
-            return self::FAILURE;
+            $this->failure = true;
+            return;
         }
 
         File::copy($encryptedFile, $testEncryptedFile);
@@ -58,7 +66,8 @@ class ThrelsCheckEnvCommand extends Command
         if ($resultCode !== 0) {
             $this->error("Failed to decrypt the .env.$env.$suffix.encrypted file.");
 
-            return self::FAILURE;
+            $this->failure = true;
+            return;
         }
 
         $this->info("Decrypted .env.$env.$suffix.encrypted successfully.");
@@ -72,7 +81,8 @@ class ThrelsCheckEnvCommand extends Command
 
         if (! File::exists($envFile) || ! File::exists($testEnvFile)) {
             $this->error("One or both files are missing: $envFile, $testEnvFile");
-            return self::FAILURE;
+            $this->failure = true;
+            return;
         }
 
         $envContent = collect(File::lines($envFile))->sort()->implode("\n");
@@ -84,7 +94,8 @@ class ThrelsCheckEnvCommand extends Command
         if ($envContent !== $decryptedContent) {
            $this->error("The .env.$env and decrypted .env.$env.encrypted do not match.");
 
-            return self::FAILURE;
+            $this->failure = true;
+            return;
         }
 
         $this->info("Success: .env.$env and the decrypted .env.$env.encrypted match.");
