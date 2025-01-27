@@ -17,17 +17,23 @@ We highly appreciate you sending us a postcard from your hometown, mentioning wh
 
 ## Installation
 
-You can install the package via composer:
+Steps to install the package
 
-```bash
-composer require threls/check-env
+- Add it to composer.json
+  
+```php
+ "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/threls/check-env"
+        }
+    ]
 ```
 
-You can publish and run the migrations with:
-
+- Run composer require
+  
 ```bash
-php artisan vendor:publish --tag="check-env-migrations"
-php artisan migrate
+composer require threls/check-env
 ```
 
 You can publish the config file with:
@@ -43,23 +49,10 @@ return [
 ];
 ```
 
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="check-env-views"
-```
-
 ## Usage
 
 ```php
-$threlsCheckEnv = new Threls\ThrelsCheckEnv();
-echo $threlsCheckEnv->echoPhrase('Hello, Threls!');
-```
-
-## Testing
-
-```bash
-composer test
+ php artisan check-env
 ```
 
 ## Changelog
