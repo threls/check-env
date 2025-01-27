@@ -46,6 +46,28 @@ This is the contents of the published config file:
 
 ```php
 return [
+
+    'temp-env-suffix' => 'test',
+    'environments' => [
+        'staging' => [
+            'encryption-key' => '',
+        ],
+
+        // Users can add as many environments as they want:
+        // 'production' => [
+        //     'encryption-key' => '',
+        // ],
+
+   'files' => [
+        '.env',
+        '.env.example',
+        '.env.staging',
+        // Users can add as many env files as they want:
+    ],
+    /* Show values on env diff table */
+    'show_values' => false,
+
+    ],
 ];
 ```
 
