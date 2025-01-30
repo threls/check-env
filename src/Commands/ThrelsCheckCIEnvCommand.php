@@ -30,10 +30,9 @@ class ThrelsCheckCIEnvCommand extends Command
         $environment = $this->option('env');
         $key = $this->option('key');
 
-        if (!$environment) {
+        if (! $environment) {
             $this->error('Environment not specified');
         }
-
 
         $this->copyEncryptedFile($environment, $suffix);
         $this->decryptEnvFile($environment, $key, $suffix);
@@ -41,7 +40,7 @@ class ThrelsCheckCIEnvCommand extends Command
         $testEnvFile = base_path(".env.$environment.$suffix");
         $testEncryptedFile = base_path(".env.$environment.$suffix.encrypted");
 
-        if (!File::exists($testEnvFile)) {
+        if (! File::exists($testEnvFile)) {
             $this->error("File is missing: $testEnvFile");
             $this->failure = true;
 
@@ -59,7 +58,7 @@ class ThrelsCheckCIEnvCommand extends Command
 
         $service->displayTable();
 
-        if (!empty($service->diff)) {
+        if (! empty($service->diff)) {
             $this->error('You have missing variables between your env files.');
             $this->failure = true;
         } else {
@@ -75,7 +74,7 @@ class ThrelsCheckCIEnvCommand extends Command
         $encryptedFile = base_path(".env.$env.encrypted");
         $testEncryptedFile = base_path(".env.$env.$suffix.encrypted");
 
-        if (!File::exists($encryptedFile)) {
+        if (! File::exists($encryptedFile)) {
             $this->error("Encrypted file not found: $encryptedFile");
 
             $this->failure = true;
@@ -115,4 +114,3 @@ class ThrelsCheckCIEnvCommand extends Command
 
     }
 }
-
