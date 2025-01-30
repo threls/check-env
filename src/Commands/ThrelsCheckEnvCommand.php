@@ -50,12 +50,11 @@ class ThrelsCheckEnvCommand extends Command
         }
 
         File::copy($encryptedFile, $testEncryptedFile);
-        $this->info("Copied $encryptedFile to $testEncryptedFile.");
     }
 
     protected function decryptEnvFile(string $env, string $key, string $suffix)
     {
-        $decryptCommand = "php artisan env:decrypt --env=$env.test --key=$key";
+        $decryptCommand = "php artisan env:decrypt --env=$env.$suffix --key=$key";
         $output = null;
         $resultCode = null;
 
@@ -66,10 +65,8 @@ class ThrelsCheckEnvCommand extends Command
 
             $this->failure = true;
 
-            return;
         }
 
-        $this->info("Decrypted .env.$env.$suffix.encrypted successfully.");
     }
 
     protected function compareEnvFiles(string $env, string $suffix)
