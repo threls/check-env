@@ -4,6 +4,7 @@ namespace Threls\ThrelsCheckEnv;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Threls\ThrelsCheckEnv\Commands\ThrelsCheckCIEnvCommand;
 use Threls\ThrelsCheckEnv\Commands\ThrelsCheckEnvCommand;
 
 class ThrelsCheckEnvServiceProvider extends PackageServiceProvider
@@ -18,8 +19,7 @@ class ThrelsCheckEnvServiceProvider extends PackageServiceProvider
         $package
             ->name('check-env')
             ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_check_env_table')
-            ->hasCommand(ThrelsCheckEnvCommand::class);
+            ->hasCommands(ThrelsCheckEnvCommand::class, ThrelsCheckCIEnvCommand::class);
+
     }
 }

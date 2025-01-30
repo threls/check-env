@@ -41,7 +41,7 @@ class ThrelsCheckEnvCommand extends Command
         $encryptedFile = base_path(".env.$env.encrypted");
         $testEncryptedFile = base_path(".env.$env.$suffix.encrypted");
 
-        if (! File::exists($encryptedFile)) {
+        if (!File::exists($encryptedFile)) {
             $this->error("Encrypted file not found: $encryptedFile");
 
             $this->failure = true;
@@ -50,12 +50,11 @@ class ThrelsCheckEnvCommand extends Command
         }
 
         File::copy($encryptedFile, $testEncryptedFile);
-        $this->info("Copied $encryptedFile to $testEncryptedFile.");
     }
 
     protected function decryptEnvFile(string $env, string $key, string $suffix)
     {
-        $decryptCommand = "php artisan env:decrypt --env=$env.test --key=$key";
+        $decryptCommand = "php artisan env:decrypt --env=$env.$suffix --key=$key";
         $output = null;
         $resultCode = null;
 
@@ -66,10 +65,8 @@ class ThrelsCheckEnvCommand extends Command
 
             $this->failure = true;
 
-            return;
         }
 
-        $this->info("Decrypted .env.$env.$suffix.encrypted successfully.");
     }
 
     protected function compareEnvFiles(string $env, string $suffix)
@@ -78,7 +75,7 @@ class ThrelsCheckEnvCommand extends Command
         $testEnvFile = base_path(".env.$env.$suffix");
         $testEncryptedFile = base_path(".env.$env.$suffix.encrypted");
 
-        if (! File::exists($envFile) || ! File::exists($testEnvFile)) {
+        if (!File::exists($envFile) || !File::exists($testEnvFile)) {
             $this->error("One or both files are missing: $envFile, $testEnvFile");
             $this->failure = true;
 
@@ -113,7 +110,7 @@ class ThrelsCheckEnvCommand extends Command
 
         $service->displayTable();
 
-        if (! empty($service->diff)) {
+        if (!empty($service->diff)) {
             $this->error('You have missing variables between your env files.');
             $this->failure = true;
         } else {
