@@ -77,6 +77,12 @@ return [
  php artisan check-env
 ```
 
+## Usage in Git CI
+
+```php
+ php artisan check-env-ci --env=  --key=
+```
+
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
