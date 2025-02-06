@@ -19,7 +19,7 @@ We highly appreciate you sending us a postcard from your hometown, mentioning wh
 
 Steps to install the package
 
-- Run composer require
+Run composer require
   
 ```bash
 composer require threls/check-env
