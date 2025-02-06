@@ -19,17 +19,6 @@ We highly appreciate you sending us a postcard from your hometown, mentioning wh
 
 Steps to install the package
 
-- Add it to composer.json
-  
-```php
- "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/threls/check-env"
-        }
-    ]
-```
-
 - Run composer require
   
 ```bash
@@ -42,7 +31,7 @@ You can publish the config file with:
 php artisan vendor:publish --tag="check-env-config"
 ```
 
-This is the contents of the published config file:
+This is the content of the published config file:
 
 ```php
 return [
