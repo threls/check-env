@@ -19,13 +19,13 @@ return [
       |--------------------------------------------------------------------------
       |
       | Define your environments here. The key should be the environment name,
-      | and the encryption-key value should include the encryption key for env file.
+      | and the encryption-key value should be the env key which will store the encryption key.
       |
       */
 
     'environments' => [
         'staging' => [
-            'encryption-key' => getEnvKeyFromFile('.env.staging','ENV_ENCRYPTION_KEY'),
+            'encryption-key' => 'ENV_ENCRYPTION_KEY',
         ],
 
         // Users can add as many environments as they want:
