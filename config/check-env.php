@@ -25,7 +25,7 @@ return [
 
     'environments' => [
         'staging' => [
-            'encryption-key' => getEnvKeyFromFile('.env.staging','ENV_ENCRYPTION_KEY'),
+            'encryption-key' => getEnvKeyFromFile('.env.staging', 'ENV_ENCRYPTION_KEY'),
         ],
 
         // Users can add as many environments as they want:
