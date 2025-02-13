@@ -42,10 +42,7 @@
         "psr-4": {
             "Threls\\ThrelsCheckEnv\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
-        },
-        "files": [
-            "src/EnvReadHelper.php"
-        ]
+        }
     },
     "scripts": {
         "post-autoload-dump": "@composer run prepare",

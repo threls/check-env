@@ -54,7 +54,7 @@ class ThrelsCheckEnvCommand extends Command
 
     protected function decryptEnvFile(string $env, string $key, string $suffix)
     {
-        $encryptionKey = getEnvKeyFromFile($env.$suffix, $key);
+        $encryptionKey = self::getEnvKeyFromFile($env.$suffix, $key);
         $decryptCommand = "php artisan env:decrypt --env=$env.$suffix --key=$encryptionKey";
         $output = null;
         $resultCode = null;
@@ -129,5 +129,22 @@ class ThrelsCheckEnvCommand extends Command
             return self::SUCCESS;
         }
 
+    }
+
+    public static function getEnvKeyFromFile($fileName, $key): ?string
+    {
+        $filePath = base_path($fileName);
+        if (! file_exists($filePath)) {
+            return null;
+        }
+
+        $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (str_starts_with($line, $key.'=')) {
+                return trim(str_replace($key.'=', '', $line), '"');
+            }
+        }
+
+        return null;
     }
 }
