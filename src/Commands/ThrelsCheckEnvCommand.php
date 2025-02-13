@@ -54,7 +54,8 @@ class ThrelsCheckEnvCommand extends Command
 
     protected function decryptEnvFile(string $env, string $key, string $suffix)
     {
-        $decryptCommand = "php artisan env:decrypt --env=$env.$suffix --key=$key";
+        $encryptionKey = getEnvKeyFromFile($env.$suffix, $key);
+        $decryptCommand = "php artisan env:decrypt --env=$env.$suffix --key=$encryptionKey";
         $output = null;
         $resultCode = null;
 
